@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.bankingapp.databinding.FragmentSecurityBinding
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class SecurityFragment : Fragment() {

@@ -3,18 +3,16 @@ package com.example.bankingapp.presentation
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class SecurityViewModel : ViewModel() {
     private val passCode = "0934"
     private var inputPassCode = ""
 
-    private val _state = MutableSharedFlow<List<PassListItem>>(
-        replay = 0,
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    val state get() = _state.asSharedFlow()
+    private val _state = MutableStateFlow(createFirstList())
+    val state get() = _state.asStateFlow()
 
     private val _action = MutableSharedFlow<Boolean>(
         replay = 0,
@@ -26,7 +24,7 @@ class SecurityViewModel : ViewModel() {
     private val inputList = mutableListOf<PassListItem>()
 
     init {
-        createPassList()
+        clearInputList()
     }
 
     fun onItemClick(itemId: Int) {
@@ -37,18 +35,16 @@ class SecurityViewModel : ViewModel() {
                 inputList[index] = PassListItem(false)
 
                 inputPassCode = inputPassCode.substring(0, inputPassCode.length - 1)
-
             }
             else -> {
                 inputPassCode += itemId.toString()
 
                 val index = inputList.indexOfFirst { !it.isChecked }
-                inputList[index] = PassListItem(true)
-
+                inputList[index] = PassListItem(true).copy()
             }
         }
 
-        _state.tryEmit(inputList)
+        _state.value = inputList.toList()
         checkedPassCode()
     }
 
@@ -56,26 +52,35 @@ class SecurityViewModel : ViewModel() {
         if (inputPassCode == passCode) {
             _action.tryEmit(true)
 
-            inputList.clear()
-            inputPassCode = ""
+            clearInputList()
+            _state.value = inputList.toList()
 
-            createPassList()
         } else if (inputPassCode.length == 4) {
             _action.tryEmit(false)
 
-            inputPassCode = ""
-            inputList.clear()
-
-            createPassList()
+            clearInputList()
+            _state.value = inputList.toList()
         }
     }
 
-    private fun createPassList() {
-        inputList.add(PassListItem(false))
-        inputList.add(PassListItem(false))
-        inputList.add(PassListItem(false))
-        inputList.add(PassListItem(false))
+    private fun clearInputList() {
+        inputPassCode = ""
+        inputList.clear()
 
-        _state.tryEmit(inputList)
+        inputList.add(PassListItem(false))
+        inputList.add(PassListItem(false))
+        inputList.add(PassListItem(false))
+        inputList.add(PassListItem(false))
+    }
+
+    private fun createFirstList(): List<PassListItem> {
+        val list = mutableListOf<PassListItem>()
+
+        list.add(PassListItem(false))
+        list.add(PassListItem(false))
+        list.add(PassListItem(false))
+        list.add(PassListItem(false))
+
+        return list
     }
 }
