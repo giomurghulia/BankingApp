@@ -31,10 +31,12 @@ class SecurityViewModel : ViewModel() {
         when (itemId) {
             10 -> {}
             11 -> {
-                val index = inputList.indexOfLast { it.isChecked }
-                inputList[index] = PassListItem(false)
+                if (inputPassCode.isNotEmpty()) {
+                    val index = inputList.indexOfLast { it.isChecked }
+                    inputList[index] = PassListItem(false)
 
-                inputPassCode = inputPassCode.substring(0, inputPassCode.length - 1)
+                    inputPassCode = inputPassCode.substring(0, inputPassCode.length - 1)
+                }
             }
             else -> {
                 inputPassCode += itemId.toString()
@@ -55,7 +57,7 @@ class SecurityViewModel : ViewModel() {
             clearInputList()
             _state.value = inputList.toList()
 
-        } else if (inputPassCode.length == 4) {
+        } else if (inputPassCode.length == passCode.length) {
             _action.tryEmit(false)
 
             clearInputList()
